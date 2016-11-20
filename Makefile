@@ -1,8 +1,21 @@
+
 CC=arm-linux-gnueabi-gcc
-CFLAGS=-ansi -pedantic -Wall -Wextra -march=armv6 -msoft-float -fPIC -mapcs-frame
 LD=arm-linux-gnueabi-ld
+
+CFLAGS=-fno-stack-protector -ansi -pedantic -Wall -Wextra -march=armv6 -msoft-float -fPIC -mapcs-frame -marm
 LDFLAGS=-N -Ttext=0x10000
 
-.SUFFIXES: .o .elf
+kernel.elf: bootstrap.o kernel.o context_switch.o syscall.o
+
+.PHONY: clean
+
+clean:
+	$(RM) *.elf *.o
+
+.SUFFIXES: .s .o .elf
+
+.s.o:
+	$(CC) $(CFLAGS) -o $@ -c $^
+
 .o.elf:
 	$(LD) $(LDFLAGS) -o $@ $^
