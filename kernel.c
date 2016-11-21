@@ -1,19 +1,6 @@
 #include "versatilepb.h"
 #include "asm.h"
 
-/* User program test */
-void first(void)
-{
-    bwputs("In user mode\n");
-    while(1) syscall();
-}
-
-void task(void)
-{
-    bwputs("In the other tast\n");
-    while(1) syscall();
-}
-
 
 void bwputs(char *s)
 {
@@ -23,6 +10,21 @@ void bwputs(char *s)
 		*UART0 = *s;
 		s++;
 	}
+}
+
+/* User program test */
+void first(void)
+{
+    bwputs("In user mode\n");
+    syscall();
+    bwputs("We back boyz\n");
+    while(1) syscall();
+}
+
+void task(void)
+{
+    bwputs("In the other tast\n");
+    while(1) syscall();
 }
 
 int main(void)
@@ -39,8 +41,10 @@ int main(void)
     tasks[1][1] = (unsigned int)&task;
 
 	bwputs("Starting...\n");
+    tasks[0] = activate(tasks[0]);
+    tasks[1] = activate(tasks[1]);
+
     activate(tasks[0]);
-    activate(tasks[1]);
 
 	while(1); /* We can't exit, there's nowhere to go */
 	return 0;
